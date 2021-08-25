@@ -7,7 +7,7 @@ RSpec.describe Article, type: :model do
     expect(article).to be_valid #article.valid? === true
     article.save!
     another_article = build(:article)
-    expect(another_article).to be_valid
+    expect(another_article).not_to be_valid
   end
 
     it 'has an invalid title' do
@@ -35,5 +35,16 @@ RSpec.describe Article, type: :model do
       expect(a2).not_to be_valid
       expect(a2.errors[:slug]).to include('has already been taken')
     end
+
+    it 'returns test in the proper order' do 
+      older_article = create(:article, created_at: 1.hour.ago)
+      recent_article = create(:article)
+      get '/articles'
+      ids = json_data.map { |item| item[:id].to_i}
+      expect(ids).to(
+        eq[recent_article.id, older_article.id]
+      )
+    end
+
   end
 end
